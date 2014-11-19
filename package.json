@@ -1,0 +1,27 @@
+{
+  "name": "detect-json-style",
+  "version": "1.0.0",
+  "description": "Detect style of formatted tabular data from a first chunk",
+  "main": "test.js",
+  "scripts": {
+    "test": "node test.js"
+  },
+  "author": "Finn Pauls",
+  "license": "MIT",
+  "devDependencies": {
+    "tape": "^3.0.3"
+  },
+  "dependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/finnp/detect-json-style"
+  },
+  "keywords": [
+    "detect",
+    "peek"
+  ],
+  "bugs": {
+    "url": "https://github.com/finnp/detect-json-style/issues"
+  },
+  "homepage": "https://github.com/finnp/detect-json-style"
+}
