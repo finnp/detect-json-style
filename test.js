@@ -29,7 +29,7 @@ test('detect JSONStream.parse()', function (t) {
   t.ok(d, 'has result')
   if(d) t.equals(d.selector, null, 'edge case single object')
     
-  // failures  
+  // negative tests  
   d = detect('{\n"a":\n 1}\n randomstuffhere {\n"b":\n 1}')
   t.notOk(d, 'no non-white characters allowed between objects')
   
@@ -41,7 +41,6 @@ test('detect JSONStream.parse()', function (t) {
 })
 
 test('detect JSONStream.parse("*")', function (t) {
-  t.plan(5)
   var d
   d = detect('[{"a":1},{"b":1}]')
   t.ok(d, 'has result')
@@ -61,10 +60,11 @@ test('detect JSONStream.parse("*")', function (t) {
   d = detect('[{"a":1}]')
   t.ok(d, 'has result')
   if(d) t.equals(d.selector, '*', 'single row')
+    
+  t.end()
 })
 
 test('detect JSONStream.parse("xyz.*")', function (t) {
-  t.plan(5)
   var d
   
   d = detect('{"rows": [{"a": 1},{"b": 2}]}')
@@ -86,6 +86,8 @@ test('detect JSONStream.parse("xyz.*")', function (t) {
   d = detect('{"rows": []}')
   t.ok(d, 'has result')
   if(d) t.equals(d.selector, 'rows.*', 'edge case empty rows')
+    
+  t.end()
 })
 
 // test('reject non json', function (t) {

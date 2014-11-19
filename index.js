@@ -31,11 +31,14 @@ module.exports = function detect(chunk) {
     
     
     // '{"whatever": }' possible but meh not detectable
-    
-    if(objectEnding(chunk) === chunk.length - 1) {
+
+    var endFirstObj = objectEnding(chunk)
+    if(endFirstObj === chunk.length - 1) {
+      // complete object '{...}'
+      // single ndjson object or
       // probably type '{"rows": [{"a": 1, "b": 2}]}'
       
-      // check that it's not a single 'ndjson' object
+      // check if it's a single 'ndjson' object
       if(JSONcheck(chunk)) {
         // '{"whatever": 1}' 
         // '{"rows": [{"a": 1, "b": 2}]}'
@@ -47,8 +50,21 @@ module.exports = function detect(chunk) {
         return {format: 'json', style: 'multiline', selector: null}
       }
       
-      // assuming: '{"rows": [{"a": 1, 
+      // not json parseable
+      return null
+      
+    } if(endFirstObj === chunk.length) {
+      // one cutoff object '{...'
+      // expecting '{"rows": [{"a": 1, "b": ...
+      // could alterantively be a very long row of ndjson
+      
       format = {format: 'json', style: 'object'}
+      
+      var arrayPos = findArrayPos(chunk)
+      var arrayPart = chunk.slice(arrayPos)
+      var arrayKey = findKey(chunk.slice(0, arrayPos))
+      
+      format.selector = arrayKey + '.*'
       
       return format
       
@@ -57,9 +73,9 @@ module.exports = function detect(chunk) {
       format = {format: 'json', style: 'multi', selector: null} // could be ndjson, but doesn't have to
       if(lastChar(chunk) === '}' && JSONcheck(chunk)) return format // only one element
       var splittedObjects = splitObjects(chunk)
-      
-      // maybe count number of { and } in the last element to find cut off objects
-      splittedObjects.pop()
+      if(splittedObjects.length === 0) return null
+
+      if(isCutOffObj(splittedObjects[splittedObjects.length - 1])) splittedObjects.pop()
       var validObjElements = splittedObjects.every(function (elem) {
         return JSONcheck(elem)
       })
@@ -68,6 +84,48 @@ module.exports = function detect(chunk) {
     
     return null
   }
+}
+
+// '{"what": 1, "rows":' -> rows
+function findKey(str) {
+  var i = str.length - 1
+  var result = ''
+  var stringEnd
+  while(str.length) {
+    if(str[i] === '"') {
+      if(stringEnd) {
+        return str.slice(i + 1, stringEnd)
+      } else {
+        stringEnd = i
+      }
+    }
+    i--
+  }
+  return false
+}
+
+function findArrayPos(str) {
+  // '{"rows": [{"a": 1, "b": ...
+  var ignoreString = false
+  for(var i = 0; i < str.length; i++) {
+    if(str[i] === '"') ignoreString = !ignoreString
+    if(!ignoreString && str[i] === '[')
+      return i
+  }
+  return false // ?
+}
+
+function isCutOffObj(str) {
+  var count = 0
+  var ignoreString = false
+  for(var i = 0; i < str.length; i++) {
+      if(str[i] === '"') ignoreString = !ignoreString
+      if(!ignoreString) {
+        if(str[i] === '{') count++
+        else if(str[i] === '}') count--
+      }
+  }
+  return count > 0
 }
 
 function splitObjects(str) {
@@ -102,13 +160,15 @@ function splitArray(str) {
     if(str[i] === '{') 
       if(searchComma) return {error: true}
       else count++
-    else if(str[i] === '}') count--
-    else if(str[i] === ',') searchComma = false
-    if(count === 0) {
-      parts.push(str.slice(lastPos, i).trim())
-      lastPos = i
-      searchComma = true
+    else if(str[i] === '}') {
+      count--
+      if(count === 0) {
+        parts.push(str.slice(lastPos, i).trim())
+        lastPos = i
+        searchComma = true
+      }
     }
+    else if(str[i] === ',') searchComma = false
   }
   return parts
 }
