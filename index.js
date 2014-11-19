@@ -1,3 +1,4 @@
+
 module.exports = function detect(chunk) {
   chunk = chunk.trim()
   var format
@@ -70,11 +71,10 @@ module.exports = function detect(chunk) {
       
     } else {
       // probably '{"a":1, "b": 2}{"a": 2, "b": 1}' (or pretty printed somehow)
-      format = {format: 'json', style: 'multi', selector: null} // could be ndjson, but doesn't have to
+      format = {format: 'json', style: 'multiline', selector: null} // could be ndjson, but doesn't have to
       if(lastChar(chunk) === '}' && JSONcheck(chunk)) return format // only one element
       var splittedObjects = splitObjects(chunk)
-      if(splittedObjects.length === 0) return null
-
+      if(!splittedObjects || splittedObjects.length === 0) return null
       if(isCutOffObj(splittedObjects[splittedObjects.length - 1])) splittedObjects.pop()
       var validObjElements = splittedObjects.every(function (elem) {
         return JSONcheck(elem)
@@ -140,7 +140,7 @@ function splitObjects(str) {
         if(count === 0) {
           parts.push(str.slice(lastPos, i + 1).trim())
           lastPos = i + 1
-        }
+        } else if(count < 0) return false
       }
     }
 

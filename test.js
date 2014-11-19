@@ -82,99 +82,16 @@ test('detect JSONStream.parse("xyz.*")', function (t) {
   d = detect('{\n"rows": \n\t[{"a":\n 1},')
   t.ok(d, 'has result')
   if(d) t.equals(d.selector, 'rows.*', 'compact formatted json object cutoff')
-  
-  d = detect('{"rows": []}')
-  t.ok(d, 'has result')
-  if(d) t.equals(d.selector, 'rows.*', 'edge case empty rows')
     
   t.end()
 })
 
-// test('reject non json', function (t) {
-//   detect('a,b,c,d,e', function (d.selector) {
-//     
-//   })
-// })
-
-
-
-// 
-// ```js
-// 
-// 
-// 
-// JSON.parser(‘*’)
-// 
-// first character ‘['
-// 
-// [
-// {“a”: 1},
-// {“b”: 2}
-// ]
-// 
-// JSON.parse()
-// 
-// put all opening ‘{‘ on a stack, each time a ‘}’ when empty try to parse, then next (“default”)
-// 
-// {
-// 
-//   “a”: 1
-// }
-// {
-//  “b”: 2
-// }
-// 
-// 
-// {“a”: 1}
-// {“b”: 2}
-// 
-// JSON.parse(‘rows.*’)
-// 
-// 
-// 
-// {
-//      “rows”: [
-//           {“a”: 1},
-//            {“b”: 2}
-//       ]
-// }
-// 
-// split until ‘['
-// 
-// 
-// '{
-//      “rows”: ['
-// 
-// remove white characters
-// 
-// '{“rows”:[‘
-// 
-// rows / results
-// 
-// {
-//      “rows”: [
-// 
-//           {“a”: 1},
-//            {“b”: 2}
-//       ]
-// }
-// 
-// 
-// {“rows”: [
-//   {“a”: 1},
-//    {“b”: 2}
-// ]}
-// 
-// 
-// Write all the peeked data to JSONStream: test if the events work
-// How to test ‘rows.*’ though?
-//    peek.slice(1,peek.indexOf(‘:’)).trim()
-// 
-// 
-// 
-// maybe something like  “results.*"
-// {"results":[
-// {"seq":5,"id":"deleted","changes":[{"rev":"2-eec205a9d413992850a6e32678485900"}],"deleted":true}
-// ],
-// "last_seq":5}
-// ```
+test('negative tests', function (t) {
+  t.notOk(detect('a,b,c'), 'csv header')
+  t.notOk(detect('data\n10\n20'), 'one row csv')
+  t.notOk(detect('a,b\n{"a":1},{"b:2"}'), 'csv with json')
+  t.notOk(detect(''), 'empty')
+  t.notOk(detect('{}}}{'), 'scrumbled {')
+  t.notOk(detect('[]]]['), 'scrumbled [')
+  t.end()
+})
