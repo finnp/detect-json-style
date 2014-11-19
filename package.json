@@ -1,6 +1,6 @@
 {
   "name": "detect-json-style",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Detect style of formatted tabular data from a first chunk",
   "main": "index.js",
   "scripts": {
