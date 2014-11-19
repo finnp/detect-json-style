@@ -1,4 +1,8 @@
 # detect-json-style
+Windows | Mac/Linux
+------- | ---------
+[![Windows Build status](http://img.shields.io/appveyor/ci/finnp/detect-json-style.svg)](https://ci.appveyor.com/project/finnp/detect-json-style/branch/master) | [![Build Status](https://travis-ci.org/finnp/detect-json-style.svg?branch=master)](https://travis-ci.org/finnp/detect-json-style)
+
 
 Detect JSON type from a first peek chunk of a string. 
 
