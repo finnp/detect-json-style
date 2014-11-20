@@ -1,5 +1,6 @@
 
 module.exports = function detect(chunk) {
+  chunk = chunk + ''
   chunk = chunk.trim()
   var format
   if(chunk[0] === '[') { // style: array
